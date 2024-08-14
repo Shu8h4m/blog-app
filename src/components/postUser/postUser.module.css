@@ -1,5 +1,9 @@
 .container {
   display: flex;
+  gap: 20px;
+}
+.textContainer {
+  display: flex;
   flex-direction: column;
   gap: 10;
 }
@@ -11,4 +15,9 @@
 
 .username {
   font-weight: 500;
+}
+
+.avatar {
+  object-fit: cover;
+  border-radius: 50%;
 }

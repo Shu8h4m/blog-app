@@ -2,41 +2,42 @@ import Image from "next/image";
 import styles from "./singlePost.module.css";
 import PostUser from "@/components/postUser/PostUser";
 import { Suspense } from "react";
-import { getPost } from "@/lib/data";
 
 // FETCH DATA WITH API
-// const getPost = async (id) => {
-//   const res = await fetch(`https://jsonplaceholder.typicode.com/posts/${id}`);
-//   if (!res.ok) {
-//     throw new Error("Cannot get the post");
-//   }
-//   return res.json();
-// };
+const getPost = async (slug) => {
+  const res = await fetch(`http://localhost:3000/api/blog/${slug}`);
+  if (!res.ok) {
+    throw new Error("Cannot get the post");
+  }
+  return res.json();
+};
+
+export const generateMetadata = async ({ params }) => {
+  const { slug } = params;
+
+  const post = await getPost(slug);
+
+  return { title: post.title, description: post.desc };
+};
 
 const SinglePagePost = async ({ params }) => {
   //FETCH DATA FROM API
-  // const post = await getPost(parseInt(params.slug));
+  const post = await getPost(params.slug);
 
   //WITHOUT API
-  const post = await getPost(params.slug);
+  // const post = await getPost(params.slug);
+  console.log(post.createdAt.toString().slice(0, 10));
   return (
     <div className={styles.container}>
-      <div className={styles.imgContainer}>
-        <Image
-          src="https://images.pexels.com/photos/27496512/pexels-photo-27496512/free-photo-of-a-cup-of-coffee-on-top-of-a-grassy-field.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1"
-          fill
-          className={styles.img}
-        />
-      </div>
+      {post.img && (
+        <div className={styles.imgContainer}>
+          <Image src={post.img} fill className={styles.img} />
+        </div>
+      )}
       <div className={styles.textContainer}>
         <h1 className={styles.title}>{post.title}</h1>
+
         <div className={styles.details}>
-          <Image
-            className={styles.avatar}
-            src="https://images.pexels.com/photos/16879010/pexels-photo-16879010/free-photo-of-little-girl-in-traditional-clothing.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1"
-            width={50}
-            height={50}
-          />
           {post && (
             <Suspense fallback={<div>Loading...</div>}>
               <PostUser userId={post.userId} />
@@ -44,11 +45,13 @@ const SinglePagePost = async ({ params }) => {
           )}
           <div className={styles.detailText}>
             <span className={styles.detailTitle}>Published</span>
-            <span className={styles.detailValue}>01.01.2024</span>
+            <span className={styles.detailValue}>
+              {post.createdAt.toString().slice(0, 10)}
+            </span>
           </div>
         </div>
 
-        <div className={styles.content}>{post.body}</div>
+        {post && <div className={styles.content}>{post.desc}</div>}
       </div>
     </div>
   );
